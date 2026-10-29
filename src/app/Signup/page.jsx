@@ -53,9 +53,19 @@ export default function Signup() {
         }
 
 
-        console.log(error)
+
 
     }
+
+    const HandleGoogleSignup = async (e) => {
+        const data = await authClient.signIn.social({
+            provider: "google",
+        });
+
+    }
+
+
+
     return (
         <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
             <div className="w-full max-w-md space-y-6 rounded-2xl bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-8 border border-slate-100">
@@ -73,6 +83,7 @@ export default function Signup() {
                 {/* Google OAuth Button */}
                 <button
                     type="button"
+                    onClick={HandleGoogleSignup}
                     className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-teal-300 hover:bg-teal-50/50 focus:outline-none focus:ring-4 focus:ring-slate-100 active:scale-[0.99]"
                 >
                     <svg

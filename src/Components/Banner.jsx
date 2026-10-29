@@ -1,3 +1,4 @@
+'use client'
 import Link from "next/link";
 import {
     ArrowRight,
@@ -7,6 +8,7 @@ import {
     BarChart3,
     CalendarCheck,
 } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 
 const HIGHLIGHTS = [
     { icon: Stethoscope, label: "Doctor Management" },
@@ -21,6 +23,9 @@ const STATS = [
 ];
 
 export default function HeroBanner() {
+    const { data: session, isPending } = authClient.useSession();
+    const user = session?.user;
+
     return (
         <section className="relative overflow-hidden bg-gradient-to-br from-teal-700 via-teal-600 to-cyan-500">
             {/* Decorative background */}
@@ -47,14 +52,14 @@ export default function HeroBanner() {
 
                     <div className="mt-8 flex flex-wrap gap-3">
                         <Link
-                            href="/login"
+                            href={user ? '/' : '/Signin'}
                             className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-teal-700 shadow-lg transition hover:bg-teal-50"
                         >
                             Get Started
                             <ArrowRight size={16} />
                         </Link>
                         <Link
-                            href="/dashboard"
+                            href={user ? '/Dashboard' : '/Signin'}
                             className="inline-flex items-center gap-2 rounded-xl border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                         >
                             View Dashboard
