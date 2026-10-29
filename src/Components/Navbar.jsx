@@ -3,7 +3,7 @@
 import { memo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Stethoscope, Users, LogOut, Menu, X, Activity } from "lucide-react";
+import { LayoutDashboard, Stethoscope, Users, LogOut, Menu, X, Activity, LogIn } from "lucide-react";
 
 const NAV_LINKS = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -54,13 +54,23 @@ function Navbar({ user, onLogout }) {
                         <p className="text-sm font-semibold text-slate-800">{user?.name || "Admin"}</p>
                         <p className="text-xs text-slate-500">{user?.email || "admin@doctortracker.com"}</p>
                     </div>
-                    <button
-                        onClick={onLogout}
-                        className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                    {/* {isLoggedIn ? ( */}
+                    {/* <button
+                            onClick={onLogout}
+                            className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                        >
+                            <LogOut size={16} />
+                            Logout
+                        </button>
+                    ) : ( */}
+                    <Link
+                        href="/Signin"
+                        className="flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-teal-700"
                     >
-                        <LogOut size={16} />
-                        Logout
-                    </button>
+                        <LogIn size={16} />
+                        Login
+                    </Link>
+                    {/* )} */}
                 </div>
 
                 {/* Mobile toggle */}
