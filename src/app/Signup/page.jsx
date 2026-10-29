@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { User, Mail, Lock, LucideIcon } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 
 
@@ -26,6 +28,34 @@ function InputField({ label, id, icon: Icon, ...props }) {
 }
 
 export default function Signup() {
+    const router = useRouter()
+
+    const HandleSignup = async (e) => {
+        e.preventDefault()
+        const Formdata = e.target
+        const name = Formdata.name.value
+        const email = Formdata.email.value
+        const password = Formdata.password.value
+
+
+        const { data, error } = await authClient.signUp.email({
+            name: name,
+            email: email,
+            password: password,
+
+            callbackURL: '/'
+        });
+        if (data) {
+            alert('Registration Successfull')
+            router.push('/')
+        } else {
+            alert(error.message)
+        }
+
+
+        console.log(error)
+
+    }
     return (
         <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
             <div className="w-full max-w-md space-y-6 rounded-2xl bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-8 border border-slate-100">
@@ -79,9 +109,10 @@ export default function Signup() {
                 </div>
 
                 {/* Form */}
-                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-4" onSubmit={HandleSignup}>
                     <InputField
                         id="name"
+                        name="name"
                         label="Full name"
                         placeholder="John Doe"
                         icon={User}
@@ -90,6 +121,7 @@ export default function Signup() {
 
                     <InputField
                         id="email"
+                        name="email"
                         label="Email"
                         type="email"
                         placeholder="you@example.com"
@@ -99,6 +131,7 @@ export default function Signup() {
 
                     <InputField
                         id="password"
+                        name="password"
                         label="Password"
                         type="password"
                         placeholder="At least 8 characters"
@@ -106,14 +139,7 @@ export default function Signup() {
                         required
                     />
 
-                    <InputField
-                        id="confirmPassword"
-                        label="Confirm password"
-                        type="password"
-                        placeholder="Repeat your password"
-                        icon={Lock}
-                        required
-                    />
+
 
                     {/* Terms Checkbox */}
                     <label className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-600 cursor-pointer pt-1">

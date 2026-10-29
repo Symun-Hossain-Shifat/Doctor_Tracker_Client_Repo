@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { Mail, Lock, LucideIcon } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+
 
 
 
@@ -29,6 +32,27 @@ function InputField({ label, id, icon: Icon, rightLabel, ...props }) {
 }
 
 export default function Signin() {
+    const router = useRouter()
+    const Handlesignin = async (e) => {
+        e.preventDefault();
+        const Formdata = e.target
+        const email = Formdata.email.value
+        const password = Formdata.password.value
+        const { data, error } = await authClient.signIn.email({
+            email: email,
+            password: password,
+            rememberMe: true,
+            callbackURL: "/",
+        });
+        if (data) {
+            alert('Login Successfull')
+            router.push('/')
+        } else {
+            alert(error.message)
+        }
+    }
+
+
     return (
         <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
             <div className="w-full max-w-md space-y-6 rounded-2xl bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-8 border border-slate-100">
@@ -82,9 +106,10 @@ export default function Signin() {
                 </div>
 
                 {/* Form */}
-                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-4" onSubmit={Handlesignin}>
                     <InputField
                         id="email"
+                        name="email"
                         label="Email"
                         type="email"
                         placeholder="you@example.com"
@@ -94,19 +119,13 @@ export default function Signin() {
 
                     <InputField
                         id="password"
+                        name="password"
                         label="Password"
                         type="password"
                         placeholder="••••••••"
                         icon={Lock}
                         required
-                        rightLabel={
-                            <Link
-                                href="/forgot-password"
-                                className="text-xs font-medium text-teal-600 hover:text-teal-700 hover:underline"
-                            >
-                                Forgot password?
-                            </Link>
-                        }
+
                     />
 
                     {/* Remember Me Checkbox */}

@@ -4,6 +4,7 @@ import { memo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Stethoscope, Users, LogOut, Menu, X, Activity, LogIn } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 
 const NAV_LINKS = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -11,9 +12,17 @@ const NAV_LINKS = [
     { href: "/patients", label: "Patients", icon: Users },
 ];
 
-function Navbar({ user, onLogout }) {
+function Navbar() {
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
+    const { data: session } = authClient.useSession()
+    const user = session?.user
+
+
+    const onLogout = async () => {
+        await authClient.signOut();
+        alert('Logout Successfull')
+    }
 
     const isActive = (href) => pathname === href || pathname.startsWith(`${href}/`);
 
@@ -51,26 +60,26 @@ function Navbar({ user, onLogout }) {
                 {/* Desktop user area */}
                 <div className="hidden items-center gap-3 md:flex">
                     <div className="text-right leading-tight">
-                        <p className="text-sm font-semibold text-slate-800">{user?.name || "Admin"}</p>
-                        <p className="text-xs text-slate-500">{user?.email || "admin@doctortracker.com"}</p>
+                        <p className="text-sm font-semibold text-slate-800">{user?.name}</p>
+                        <p className="text-xs text-slate-500">{user?.email}</p>
                     </div>
-                    {/* {isLoggedIn ? ( */}
-                    {/* <button
+                    {user ? (
+                        <button
                             onClick={onLogout}
                             className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
                         >
                             <LogOut size={16} />
                             Logout
                         </button>
-                    ) : ( */}
-                    <Link
-                        href="/Signin"
-                        className="flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-teal-700"
-                    >
-                        <LogIn size={16} />
-                        Login
-                    </Link>
-                    {/* )} */}
+                    ) : (
+                        <Link
+                            href="/Signin"
+                            className="flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-teal-700"
+                        >
+                            <LogIn size={16} />
+                            Login
+                        </Link>
+                    )}
                 </div>
 
                 {/* Mobile toggle */}
