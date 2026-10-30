@@ -6,6 +6,13 @@ import { client } from "@/db";
 export const auth = betterAuth({
     database: mongodbAdapter(client.db("DoctorTracker")),
 
+    baseURL: process.env.BETTER_AUTH_URL,
+
+    trustedOrigins: [
+        "http://localhost:3000",
+        "https://doctor-tracker-client-seven.vercel.app",
+    ],
+
     emailAndPassword: {
         enabled: true,
     },
@@ -21,11 +28,9 @@ export const auth = betterAuth({
         additionalFields: {
             role: {
                 type: "string",
-
                 defaultValue: "Admin",
                 input: true,
             },
-
         },
     },
 });
