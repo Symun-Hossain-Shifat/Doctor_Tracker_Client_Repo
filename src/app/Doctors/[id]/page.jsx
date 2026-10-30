@@ -2,8 +2,10 @@ import PatientCard from "@/Components/Patientshow";
 import AddPatientButton from "./Patientform";
 import GetpatientbyDoctorId from "@/lib/Action/GetData/Getpatient";
 import { UserPlus } from "lucide-react";
+import { requireAuth } from "@/lib/require-auth";
 
 export default async function DoctorByIdPage({ params }) {
+    await requireAuth()
     const { id } = await params;
     const Data = await GetpatientbyDoctorId(id);
     const patients = Data ?? [];

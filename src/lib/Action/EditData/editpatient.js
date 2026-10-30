@@ -1,11 +1,14 @@
+import { authHeader } from "../GetData/GetToken";
 
 export default async function editpatient(id, Data) {
+
     const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/Patiens/${id}`;
 
     const response = await fetch(url, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
+            ...await authHeader()
         },
         body: JSON.stringify(Data),
     });

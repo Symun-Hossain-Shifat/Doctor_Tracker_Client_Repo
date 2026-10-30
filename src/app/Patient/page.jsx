@@ -1,8 +1,12 @@
 import Patientpage from "@/Components/AllpatientShow"
 
 import { Getallpatient } from "@/lib/Action/GetData/Getpatient"
+import { requireAuth } from "@/lib/require-auth"
+
 
 export default async function PatientPage() {
+    await requireAuth()
+
     const patients = await Getallpatient()
 
     return (
