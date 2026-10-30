@@ -45,11 +45,11 @@ A responsive doctor and patient management application designed to help administ
 
 ### Desktop View
 
-![Doctor Tracker Desktop Screenshot](docs/screenshots/doctor-tracker-desktop.png)
+https://drive.google.com/file/d/1talmhDEpN5DfJf_EcxXPFJKvMsYmP3HB/view?usp=sharing
 
 ### Mobile View
 
-![Doctor Tracker Mobile Screenshot](docs/screenshots/doctor-tracker-mobile.jpg)
+https://drive.google.com/file/d/1DC3r8i4og-sIja_r-NTP3NhBYLeSn_cO/view?usp=sharing
 
 ## Installation and Setup
 
@@ -273,7 +273,7 @@ The application is deployed using Vercel.
 ### Production URLs
 
 - Frontend: https://doctor-tracker-client-seven.vercel.app
-- Backend: https://doctor-tracker-server-eight.vercel.app
+- Backend: https://doctor-tracker-server-ten.vercel.app
 
 Make sure all production environment variables are configured in Vercel before deployment.
 
