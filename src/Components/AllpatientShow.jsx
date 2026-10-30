@@ -1,6 +1,6 @@
 "use client"; // Needed in Next.js: this file uses state and event handlers
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     CalendarDays,
     ChevronLeft,
@@ -15,6 +15,9 @@ import {
     Trash2,
     X,
 } from "lucide-react";
+import Deletepatient from "@/lib/Action/DeleteData/patientdelete";
+import { useRouter } from "next/navigation";
+import editpatient from "@/lib/Action/EditData/editpatient";
 
 /* -------------------------------------------------------------------------- */
 /*                                   Helpers                                  */
@@ -33,8 +36,8 @@ const INITIAL_FILTERS = {
     sort: "newest",
 };
 
-function getInitials(name = "") {
-    return name
+function getInitials(name) {
+    return (name || "")
         .trim()
         .split(/\s+/)
         .filter(Boolean)
@@ -169,9 +172,11 @@ function applyFilters(patients, filters) {
 /* -------------------------------------------------------------------------- */
 /*                                 Patient card                               */
 /* -------------------------------------------------------------------------- */
-
 function PatientCard({ patient, onEdit, onDelete }) {
+    const inputClass =
+        "mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20";
     const {
+        _id,
         name,
         age,
         gender,
@@ -182,6 +187,79 @@ function PatientCard({ patient, onEdit, onDelete }) {
         admissionDate,
         createdAt,
     } = patient;
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const router = useRouter();
+
+    const closeModal = () => setIsModalOpen(false);
+
+    // Close on Escape and lock background scroll while the modal is open
+    useEffect(() => {
+        if (!isModalOpen) return;
+
+        const onKeyDown = (e) => {
+            if (e.key === "Escape") setIsModalOpen(false);
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        return () => {
+            window.removeEventListener("keydown", onKeyDown);
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [isModalOpen]);
+
+    const handleDelete = async (id) => {
+        const result = await Deletepatient(id);
+        console.log(result);
+        if (result.deletedCount === 1) {
+            alert("Delete Patient Successfull");
+            router.refresh("/");
+        } else {
+            alert("Delete Patient Failed");
+        }
+    };
+
+
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+
+        const Formdata = e.target;
+
+        const Data = {
+            email: Formdata.email.value,
+            name: Formdata.name.value,
+            gender: Formdata.gender.value,
+            age: Number(Formdata.age.value),
+            phone: Formdata.phone.value,
+            address: Formdata.address.value,
+            condition: Formdata.condition.value,
+            admissionDate: Formdata.admissionDate.value,
+        };
+
+        try {
+            const result = await editpatient(patient._id, Data);
+
+            console.log(result);
+
+            if (result.success) {
+                alert("Patient Updated Successfully!");
+
+                closeModal();
+                router.refresh();
+            } else {
+                alert("Patient Update Failed!");
+            }
+
+        } catch (error) {
+            console.error("Update error:", error);
+            alert(error.message || "Patient Update Failed!");
+        }
+    };
+
 
     return (
         <article className="flex flex-col rounded-2xl bg-white p-6 shadow-md ring-1 ring-slate-200">
@@ -224,11 +302,7 @@ function PatientCard({ patient, onEdit, onDelete }) {
             <ul className="mt-5 space-y-3 text-sm text-slate-600">
                 {phone && (
                     <li className="flex items-start gap-3">
-                        <Phone
-                            size={16}
-                            aria-hidden="true"
-                            className="mt-0.5 shrink-0 text-teal-600"
-                        />
+                        <Phone size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-teal-600" />
                         <a href={`tel:${phone}`} className="hover:underline">
                             {phone}
                         </a>
@@ -237,15 +311,8 @@ function PatientCard({ patient, onEdit, onDelete }) {
 
                 {email && (
                     <li className="flex items-start gap-3">
-                        <Mail
-                            size={16}
-                            aria-hidden="true"
-                            className="mt-0.5 shrink-0 text-teal-600"
-                        />
-                        <a
-                            href={`mailto:${email}`}
-                            className="break-all hover:underline"
-                        >
+                        <Mail size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-teal-600" />
+                        <a href={`mailto:${email}`} className="break-all hover:underline">
                             {email}
                         </a>
                     </li>
@@ -253,11 +320,7 @@ function PatientCard({ patient, onEdit, onDelete }) {
 
                 {address && (
                     <li className="flex items-start gap-3">
-                        <MapPin
-                            size={16}
-                            aria-hidden="true"
-                            className="mt-0.5 shrink-0 text-teal-600"
-                        />
+                        <MapPin size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-teal-600" />
                         <span>{address}</span>
                     </li>
                 )}
@@ -266,24 +329,18 @@ function PatientCard({ patient, onEdit, onDelete }) {
             {/* Dates */}
             <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4 text-sm">
                 <p className="flex items-center gap-2 font-medium text-slate-800">
-                    <CalendarDays
-                        size={16}
-                        aria-hidden="true"
-                        className="text-teal-600"
-                    />
+                    <CalendarDays size={16} aria-hidden="true" className="text-teal-600" />
                     Admitted {formatDate(admissionDate)}
                 </p>
 
-                <p className="text-xs text-slate-400">
-                    Added {formatDate(createdAt)}
-                </p>
+                <p className="text-xs text-slate-400">Added {formatDate(createdAt)}</p>
             </div>
 
             {/* Actions */}
             <div className="mt-5 flex justify-end gap-3 border-t border-slate-100 pt-4">
                 <button
                     type="button"
-                    onClick={() => onEdit?.(patient)}
+                    onClick={() => setIsModalOpen(true)}
                     className="flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
                 >
                     <Pencil size={16} aria-hidden="true" />
@@ -292,13 +349,198 @@ function PatientCard({ patient, onEdit, onDelete }) {
 
                 <button
                     type="button"
-                    onClick={() => onDelete?.(patient)}
+                    onClick={() => handleDelete(_id)}
                     className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-500"
                 >
                     <Trash2 size={16} aria-hidden="true" />
                     Delete patient
                 </button>
             </div>
+
+            {/* Edit modal */}
+            {isModalOpen && (
+                <div
+                    className="fixed inset-0 z-[60] grid place-items-center bg-slate-900/60 p-4"
+                    onClick={closeModal}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby={`edit-title-${_id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"
+                    >
+                        {/* Modal header */}
+                        <div className="flex items-center justify-between">
+                            <h2
+                                id={`edit-title-${_id}`}
+                                className="text-xl font-bold text-slate-900"
+                            >
+                                Edit patient
+                            </h2>
+
+                            <button
+                                type="button"
+                                onClick={closeModal}
+                                aria-label="Close"
+                                className="grid h-9 w-9 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100"
+                            >
+                                <X size={20} aria-hidden="true" />
+                            </button>
+                        </div>
+
+                        {/* Edit form */}
+                        <form onSubmit={handleUpdate} className="mt-5 space-y-4">
+                            {/* Patient name */}
+                            <div>
+                                <label htmlFor={`edit-name-${_id}`} className="text-sm font-medium text-slate-700">
+                                    Patient name <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    id={`edit-name-${_id}`}
+                                    name="name"
+                                    type="text"
+                                    required
+                                    defaultValue={name || ""}
+                                    placeholder="Karim Uddin"
+                                    className={inputClass}
+                                />
+                            </div>
+
+                            {/* Age and gender */}
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label htmlFor={`edit-age-${_id}`} className="text-sm font-medium text-slate-700">
+                                        Age <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        id={`edit-age-${_id}`}
+                                        name="age"
+                                        type="number"
+                                        min="0"
+                                        max="130"
+                                        required
+                                        defaultValue={age ?? ""}
+                                        placeholder="35"
+                                        className={inputClass}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label htmlFor={`edit-gender-${_id}`} className="text-sm font-medium text-slate-700">
+                                        Gender
+                                    </label>
+                                    <select
+                                        id={`edit-gender-${_id}`}
+                                        name="gender"
+                                        defaultValue={gender?.toLowerCase() || ""}
+                                        className={inputClass}
+                                    >
+                                        <option value="">Select gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Phone and email */}
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label htmlFor={`edit-phone-${_id}`} className="text-sm font-medium text-slate-700">
+                                        Phone
+                                    </label>
+                                    <input
+                                        id={`edit-phone-${_id}`}
+                                        name="phone"
+                                        type="tel"
+                                        defaultValue={phone || ""}
+                                        placeholder="+880 1711-000000"
+                                        className={inputClass}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label htmlFor={`edit-email-${_id}`} className="text-sm font-medium text-slate-700">
+                                        Email
+                                    </label>
+                                    <input
+                                        id={`edit-email-${_id}`}
+                                        name="email"
+                                        type="email"
+                                        defaultValue={email || ""}
+                                        placeholder="patient@example.com"
+                                        className={inputClass}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Address */}
+                            <div>
+                                <label htmlFor={`edit-address-${_id}`} className="text-sm font-medium text-slate-700">
+                                    Address
+                                </label>
+                                <input
+                                    id={`edit-address-${_id}`}
+                                    name="address"
+                                    type="text"
+                                    defaultValue={address || ""}
+                                    placeholder="House 12, Road 5, Mirpur, Dhaka"
+                                    className={inputClass}
+                                />
+                            </div>
+
+                            {/* Patient condition */}
+                            <div>
+                                <label htmlFor={`edit-condition-${_id}`} className="text-sm font-medium text-slate-700">
+                                    Patient condition
+                                </label>
+                                <textarea
+                                    id={`edit-condition-${_id}`}
+                                    name="condition"
+                                    rows={3}
+                                    defaultValue={condition || ""}
+                                    placeholder="Describe the patient's current condition"
+                                    className={`${inputClass} resize-y`}
+                                />
+                            </div>
+
+                            {/* Admission date */}
+                            <div>
+                                <label htmlFor={`edit-admissionDate-${_id}`} className="text-sm font-medium text-slate-700">
+                                    Admission date
+                                </label>
+                                <input
+                                    id={`edit-admissionDate-${_id}`}
+                                    name="admissionDate"
+                                    type="date"
+                                    defaultValue={admissionDate ? String(admissionDate).slice(0, 10) : ""}
+                                    className={inputClass}
+                                />
+                            </div>
+
+                            {/* Buttons */}
+                            <div className="flex justify-end gap-3 border-t border-slate-100 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={closeModal}
+                                    className="rounded-xl bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+
+                                    className="rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
+                                >
+                                    Update patient
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </article>
     );
 }
@@ -396,6 +638,7 @@ export default function Patientpage({ patients = [], onEdit, onDelete }) {
 
     return (
         <div className="space-y-6">
+            <h1 className="text-3xl font-bold">Patients</h1>
             {/* Search & filters */}
             <section
                 aria-label="Search and filter patients"
@@ -659,8 +902,8 @@ export default function Patientpage({ patients = [], onEdit, onDelete }) {
                                 aria-label={`Page ${item}`}
                                 aria-current={item === currentPage ? "page" : undefined}
                                 className={`min-w-10 rounded-lg px-3 py-2 text-sm font-semibold transition ${item === currentPage
-                                        ? "bg-teal-600 text-white"
-                                        : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
+                                    ? "bg-teal-600 text-white"
+                                    : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
                                     }`}
                             >
                                 {item}
