@@ -38,7 +38,7 @@ export default function PatientCard({ patient }) {
     const handleDelete = async (id) => {
         const result = await Deletepatient(id)
         console.log(result)
-        if (result.deletedCount === 1) {
+        if (result.success = true) {
             alert('Delete Patient Successfull')
             router.refresh('/')
         } else {
